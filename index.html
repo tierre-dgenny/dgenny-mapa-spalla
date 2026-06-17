@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Comparativo — dgenny® · Espala Engenharia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --azul: #121325; --roxo: #6660B4; --rosa: #FFBEF5; --white: #FFFFFF; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #0d0e1f; font-family: 'Quicksand', Arial, sans-serif; }
+        .deck { position: relative; width: 100vw; height: 100vh; }
+        .slide { position: absolute; inset: 0; display: none; flex-direction: column; background: var(--azul); color: var(--white); padding: 46px 66px 68px; overflow: hidden; }
+        .slide.active { display: flex; }
+        .slide::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 65% 65% at 95% 5%, rgba(102, 96, 180, 0.12) 0%, transparent 70%), radial-gradient(ellipse 45% 45% at 5% 95%, rgba(255, 190, 245, 0.06) 0%, transparent 70%); }
+        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 52px; background: rgba(12, 13, 28, 0.97); border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: center; gap: 20px; z-index: 999; backdrop-filter: blur(12px); }
+        .nav-btn { background: rgba(102, 96, 180, 0.18); border: 1px solid rgba(102, 96, 180, 0.38); color: #fff; padding: 7px 22px; border-radius: 50px; cursor: pointer; font-family: 'Quicksand', sans-serif; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .nav-btn:hover { background: var(--roxo); border-color: var(--roxo); }
+        .slide-counter { font-family: 'Quicksand', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.35); min-width: 56px; text-align: center; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--roxo), var(--rosa)); transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1); z-index: 999; border-radius: 0 2px 2px 0; }
+        .logo { font-family: 'Montserrat', Arial, sans-serif; font-size: 15px; font-weight: 800; color: var(--white); letter-spacing: -0.2px; display: flex; align-items: center; gap: 7px; position: relative; z-index: 1; }
+        .logo-ico { width: 22px; height: 22px; border-radius: 50%; background: var(--rosa); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: var(--azul); }
+        .logo-reg { font-size: 8px; vertical-align: super; color: rgba(255, 255, 255, 0.4); }
+        .slide-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; position: relative; z-index: 1; }
+        .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--roxo); background: rgba(102, 96, 180, 0.12); border: 1px solid rgba(102, 96, 180, 0.24); padding: 5px 14px; border-radius: 50px; }
+        .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 2.2px; text-transform: uppercase; color: var(--roxo); margin-bottom: 10px; position: relative; z-index: 1; }
+        h1, h2, h3 { font-family: 'Montserrat', Arial, sans-serif; }
+        .hl { font-family: 'Montserrat', Arial, sans-serif; font-weight: 800; line-height: 1.1; position: relative; z-index: 1; }
+        .hl-xl { font-size: 48px; }
+        .hl-lg { font-size: 36px; }
+        .hl-md { font-size: 26px; }
+        .sub { font-family: 'Quicksand', sans-serif; color: rgba(255, 255, 255, 0.52); line-height: 1.6; position: relative; z-index: 1; }
+        .sub-lg { font-size: 19px; }
+        .sub-md { font-size: 14px; }
+        .c-rosa { color: var(--rosa); }
+        .c-roxo { color: #8078d4; }
+        .c-green { color: #64e080; }
+        .c-red { color: #ff8080; }
+        .mt-8 { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
+        .mt-16 { margin-top: 16px; }
+        .mt-20 { margin-top: 20px; }
+        .mt-24 { margin-top: 24px; }
+        .mt-28 { margin-top: 28px; }
+        .mt-32 { margin-top: 32px; }
+        .mt-40 { margin-top: 40px; }
+        .content { flex: 1; position: relative; z-index: 1; display: flex; flex-direction: column; }
+        .fn { font-size: 11px; color: rgba(255, 255, 255, 0.25); position: relative; z-index: 1; margin-top: auto; padding-top: 10px; }
+        .card { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 20px; position: relative; z-index: 1; }
+        .card.roxo { background: rgba(102, 96, 180, 0.1); border-color: rgba(102, 96, 180, 0.22); }
+        .card.rosa { background: rgba(255, 190, 245, 0.06); border-color: rgba(255, 190, 245, 0.18); }
+        .card.danger { background: rgba(255, 80, 80, 0.07); border-color: rgba(255, 80, 80, 0.18); }
+        .card.success { background: rgba(80, 220, 120, 0.07); border-color: rgba(80, 220, 120, 0.18); }
+        .card.warn { background: rgba(255, 180, 50, 0.07); border-color: rgba(255, 180, 50, 0.2); }
+        .clabel { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255, 255, 255, 0.35); margin-bottom: 7px; }
+        .ctitle { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 5px; }
+        .cdesc { font-size: 12px; color: rgba(255, 255, 255, 0.48); line-height: 1.55; }
+        .bnum { font-family: 'Montserrat', Arial, sans-serif; font-size: 34px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; position: relative; z-index: 1; }
+        .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px; position: relative; z-index: 1; }
+        .g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; position: relative; z-index: 1; }
+        .dtable { width: 100%; border-collapse: collapse; font-size: 13px; position: relative; z-index: 1; }
+        .dtable th { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255, 255, 255, 0.33); padding: 9px 14px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+        .dtable td { padding: 12px 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.8); vertical-align: middle; }
+        .dtable tr:last-child td { border-bottom: none; }
+        .dtable .amt { font-family: 'Montserrat', sans-serif; font-weight: 600; text-align: right; color: #ff8080; }
+        .dtable .amt.pos { color: #64e080; }
+        .dtable .amt.neu { color: var(--rosa); }
+        .dtable .sub-head td { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding-top: 13px; padding-bottom: 3px; border-bottom: none; }
+        .dtable .sub-head.red td { color: rgba(255, 80, 80, 0.6); }
+        .dtable .sub-head.grn td { color: rgba(100, 224, 128, 0.6); }
+        .chk { display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; border-radius: 10px; font-size: 12px; color: rgba(255, 255, 255, 0.68); }
+        .chk.bad { background: rgba(255, 80, 80, 0.06); border: 1px solid rgba(255, 80, 80, 0.14); }
+        .chk.good { background: rgba(80, 220, 120, 0.06); border: 1px solid rgba(80, 220, 120, 0.14); }
+        .chk.lock { background: rgba(255, 180, 50, 0.06); border: 1px solid rgba(255, 180, 50, 0.14); }
+        .mrow { display: grid; grid-template-columns: 1fr 105px 26px 105px; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+        .mrow:last-child { border-bottom: none; }
+        .mrow .ml { font-size: 12px; color: rgba(255, 255, 255, 0.7); }
+        .mrow .mb { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #ff8080; text-align: center; }
+        .mrow .ma { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #64e080; text-align: center; }
+        .mrow .mar { color: rgba(255, 255, 255, 0.2); font-size: 13px; text-align: center; }
+        .roi-box { background: linear-gradient(135deg, rgba(102, 96, 180, 0.2), rgba(255, 190, 245, 0.08)); border: 1px solid rgba(102, 96, 180, 0.28); border-radius: 18px; padding: 26px; text-align: center; position: relative; z-index: 1; }
+        .roi-num { font-family: 'Montserrat', Arial, sans-serif; font-size: 66px; font-weight: 900; line-height: 1; background: linear-gradient(135deg, #8078d4, var(--rosa)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -2px; }
+        .roi-lbl { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); margin-top: 6px; }
+        .stepbox { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 9px; position: relative; z-index: 1; }
+        .stepnum { width: 42px; height: 42px; border-radius: 50%; background: rgba(102, 96, 180, 0.15); border: 2px solid var(--roxo); display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-size: 15px; font-weight: 800; color: var(--roxo); }
+        .steptitle { font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; }
+        .stepdesc { font-size: 11px; color: rgba(255, 255, 255, 0.45); line-height: 1.5; }
+        .flow7 { display: flex; align-items: stretch; gap: 0; position: relative; z-index: 1; }
+        .f7step { flex: 1; padding: 12px 6px; text-align: center; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .f7step.pain { background: rgba(255, 80, 80, 0.07); border-color: rgba(255, 80, 80, 0.2); }
+        .f7step.dg { background: rgba(102, 96, 180, 0.14); border-color: rgba(102, 96, 180, 0.3); }
+        .f7step.lock { background: rgba(255, 180, 50, 0.07); border-color: rgba(255, 180, 50, 0.2); }
+        .f7step .fnum { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.3); }
+        .f7step .fname { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.9); line-height: 1.2; }
+        .f7step .fdesc { font-size: 9px; color: rgba(255, 255, 255, 0.4); }
+        .f7step .ftag { font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-top: 2px; display: inline-block; }
+        .ftag.red { color: #ff8080; background: rgba(255, 80, 80, 0.12); }
+        .ftag.roxo { color: #a09ce8; background: rgba(102, 96, 180, 0.18); }
+        .ftag.oran { color: #ffb84d; background: rgba(255, 180, 50, 0.15); }
+        .ftag.grn { color: #64e080; background: rgba(80, 220, 120, 0.15); }
+        .farr { color: rgba(102, 96, 180, 0.4); font-size: 14px; display: flex; align-items: center; padding: 0 3px; flex-shrink: 0; }
+        .next-step-card { background: rgba(102, 96, 180, 0.12); border: 1.5px solid rgba(102, 96, 180, 0.45); border-radius: 14px; padding: 18px 20px; position: relative; z-index: 1; }
+        .next-step-card .nsc-num { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 900; color: var(--roxo); letter-spacing: 1px; margin-bottom: 6px; }
+        .next-step-card .nsc-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-bottom: 5px; }
+        .next-step-card .nsc-desc { font-size: 12px; color: rgba(255, 255, 255, 0.5); line-height: 1.5; }
+        .next-step-card .nsc-date { font-size: 10px; font-weight: 700; color: var(--rosa); letter-spacing: 1px; text-transform: uppercase; margin-top: 10px; }
+        @media (max-width: 1024px) {
+            .slide { padding: 28px 34px 62px; }
+            .hl-xl { font-size: 32px; }
+            .hl-lg { font-size: 24px; }
+            .hl-md { font-size: 20px; }
+            .sub-lg { font-size: 16px; }
+            .g3 { grid-template-columns: 1fr 1fr; }
+            .g4 { grid-template-columns: 1fr 1fr; }
+            .roi-num { font-size: 48px; }
+            .bnum { font-size: 26px; }
+            .flow7 { overflow-x: auto; padding-bottom: 8px; }
+            .f7step { min-width: 80px; }
+            .mrow { grid-template-columns: 1fr 80px 20px 80px; }
+        }
+        @media (max-width: 600px) {
+            .slide { padding: 16px 16px 76px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+            .hl-xl { font-size: 22px; line-height: 1.2; }
+            .hl-lg { font-size: 18px; line-height: 1.2; }
+            .hl-md { font-size: 15px; }
+            .sub-lg { font-size: 13px; }
+            .sub-md { font-size: 12px; }
+            .eyebrow { font-size: 9px; letter-spacing: 1.5px; margin-bottom: 6px; }
+            .tag { font-size: 9px; padding: 4px 10px; letter-spacing: 1px; }
+            .slide-top { margin-bottom: 12px; }
+            .logo { font-size: 13px; }
+            .logo-ico { width: 18px; height: 18px; font-size: 9px; }
+            .g2, .g3, .g4 { grid-template-columns: 1fr; }
+            .flow7 { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+            .f7step { min-width: 76px; padding: 8px 4px; }
+            .mrow { grid-template-columns: 1fr 68px 18px 68px; gap: 5px; }
+            .mrow .ml, .mrow .mb, .mrow .ma { font-size: 11px; }
+            .roi-num { font-size: 40px; }
+            .roi-box { padding: 18px; }
+            .bnum { font-size: 22px; }
+            .nav-bar { height: 60px; gap: 12px; }
+            .nav-btn { padding: 11px 22px; font-size: 14px; }
+            .card { padding: 12px; }
+            .ctitle { font-size: 12px; }
+            .cdesc { font-size: 11px; }
+            .chk { font-size: 11px; padding: 9px 10px; gap: 8px; }
+            .dtable { font-size: 11px; }
+            .dtable th { font-size: 9px; padding: 7px 6px; }
+            .dtable td { padding: 8px 6px; }
+            .mt-40, .mt-36, .mt-32 { margin-top: 16px; }
+            .mt-28, .mt-24 { margin-top: 13px; }
+            .mt-20 { margin-top: 11px; }
+        }
+        @media print {
+            body { overflow: visible; }
+            .slide { position: relative !important; display: flex !important; page-break-after: always; height: 100vh; }
+            .nav-bar, .progress-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="progressBar" class="progress-bar"></div>
+    <div class="deck">
+
+        <!-- Slide 1: Capa -->
+        <div class="slide active">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="tag">Confidencial</div>
+            </div>
+            <div class="content">
+                <h1 class="hl hl-xl">Mapa Comparativo<br>Espala Engenharia</h1>
+                <p class="sub sub-lg mt-32">O que muda — e o que se ganha — com a decisão certa.</p>
+                <p class="sub sub-md mt-16">O custo do processo atual de cotação e o que a dgenny® transforma — sem substituir ninguém da equipe.</p>
+                <p class="fn mt-40"><strong>Espala Engenharia · Suprimentos</strong><br>Preparado pela dgenny® · Junho de 2026</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Diagnóstico -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Diagnóstico</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Como funciona hoje</h2>
+                <p class="sub sub-md mt-12">O processo em 6 etapas — estruturado, mas com gargalo nas etapas 3 e 4</p>
+
+                <div class="flow7 mt-28">
+                    <div class="f7step">
+                        <div class="fnum">01</div>
+                        <div class="fname">Solicitação</div>
+                        <div class="fdesc">Obra abre pedido no UAW</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">02</div>
+                        <div class="fname">Aprovação</div>
+                        <div class="fdesc">Engenharia + Diretoria aprovam</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step pain">
+                        <div class="fnum">03</div>
+                        <div class="fname">Cotação</div>
+                        <div class="fdesc">ConstrutorCompras + WhatsApp manual</div>
+                        <span class="ftag red">Gargalo</span>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step pain">
+                        <div class="fnum">04</div>
+                        <div class="fname">Mapa</div>
+                        <div class="fdesc">Equalização manual das propostas</div>
+                        <span class="ftag red">Manual</span>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">05</div>
+                        <div class="fname">Aprovação</div>
+                        <div class="fdesc">Michael aprova via WhatsApp</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">06</div>
+                        <div class="fname">Ordem de Compra</div>
+                        <div class="fdesc">OC gerada no UAW</div>
+                    </div>
+                </div>
+
+                <div class="g2 mt-28">
+                    <div class="card danger">
+                        <div class="clabel">Problema na etapa 3</div>
+                        <div class="ctitle">ConstrutorCompras sem aderência regional</div>
+                        <p class="cdesc">Fornecedores de outras cidades e estados não preenchem o portal — a equipe volta ao WhatsApp manual de qualquer jeito. O portal que deveria ajudar cria um passo extra.</p>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Problema na etapa 4</div>
+                        <div class="ctitle">Erros descobertos só na equalização</div>
+                        <p class="cdesc">Itens com especificação errada, unidade de medida divergente ou incompletos são descobertos quando o comprador monta o mapa — tarde demais para corrigir sem atraso.</p>
+                    </div>
+                </div>
+
+                <div class="card warn mt-16">
+                    <div class="clabel">Contexto operacional</div>
+                    <div class="ctitle">20+ obras simultâneas · 8 cidades · 2 compradores</div>
+                    <p class="cdesc">São Paulo, Campinas, Leme, Araras, Piraçunga, São Carlos, Santa Bárbara, Americana — cada nova cidade exige abertura de fornecedores do zero. O volume que não para de crescer encontra o mesmo processo de sempre.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: A Dor Central -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">A Dor Central</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">10 a 15 cotações por dia.<br>2 pessoas. 20 obras.</h2>
+                <p class="sub sub-md mt-16">A equipe não está mal estruturada — ela está afogada no operacional que não escala.</p>
+
+                <div class="card danger mt-28" style="border-left: 3px solid #ff8080;">
+                    <div class="clabel">Citação direta — Michael Dias da Silva, Gestor de Suprimentos</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; font-style: italic;">"Hoje eu tô completamente no processo braçal junto com a Bruna. A gente estamos com mais de 20 obras — não é 20 obras no estado de São Paulo, é 20 obras em São Paulo, Campinas, Leme, Araras, Piraçunga... E eu não posso ficar sempre com o braçal porque eu tenho Apex também para olhar, cuido das frotas da empresa."</p>
+                </div>
+
+                <div class="g3 mt-28">
+                    <div class="card danger">
+                        <div class="bnum c-red">10–15</div>
+                        <div class="ctitle">cotações por dia</div>
+                        <p class="cdesc mt-8">com apenas 2 compradores — volume que cresce com cada nova obra no portfólio</p>
+                    </div>
+                    <div class="card danger">
+                        <div class="bnum c-red">80%</div>
+                        <div class="ctitle">do tempo é braçal</div>
+                        <p class="cdesc mt-8">contato manual com fornecedores, equalização e follow-up — pouco sobra para negociar</p>
+                    </div>
+                    <div class="card danger">
+                        <div class="bnum c-red">5–10%</div>
+                        <div class="ctitle">de saving perdido</div>
+                        <p class="cdesc mt-8">em pedidos urgentes, a negociação é atropelada — fecha com os primeiros 3–4 que respondem</p>
+                    </div>
+                </div>
+
+                <div class="card warn mt-20">
+                    <div class="clabel">O ciclo vicioso da urgência</div>
+                    <p class="cdesc">Urgência → sem tempo para negociar → aceita o primeiro preço → obra não para → nova urgência. E cada nova obra da Espala adiciona mais pressão no mesmo gargalo — sem aumentar a equipe. <em>"A gente tem demanda de muito pedidos urgentes, então acaba não conseguindo fazer aquela negociação muito bem feita."</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Por que o problema persiste -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Por que o problema persiste</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Trocar de sistema não resolve</h2>
+                <p class="sub sub-md mt-12">O ConstrutorCompras já está integrado ao UAW — e o gargalo persiste. Por quê?</p>
+
+                <div class="card danger mt-28" style="border-left: 3px solid #ff8080;">
+                    <div class="clabel">A raiz do problema — comportamento dos fornecedores</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; font-style: italic;">"Uns três, quatro primeiros a responder lá, chegou no preço que a gente precisa, eu vou e fecho. Não dou nem tempo de esperar 5 dias, 10 dias para receber uma cotação."</p>
+                </div>
+
+                <div class="g2 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Problema estrutural 1</div>
+                        <div class="ctitle">Fornecedores não aderem ao portal</div>
+                        <p class="cdesc mt-8">O ConstrutorCompras funciona no Sudeste, mas fornecedores de novas cidades e regiões não preenchem o sistema — a equipe volta ao WhatsApp manual de qualquer jeito</p>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Problema estrutural 2</div>
+                        <div class="ctitle">Novos fornecedores = Google manual</div>
+                        <p class="cdesc mt-8">"Google, Google, puxa pro WhatsApp" — abrir cadastros em 8 cidades diferentes exige pesquisa manual, verificação de golpes e contato individual. Processo que não escala com as obras.</p>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Problema estrutural 3</div>
+                        <div class="ctitle">Sem tempo para homologação real</div>
+                        <p class="cdesc mt-8">A Espala já sofreu com fornecedores falsos — "site bonitinho e no final é golpe". Sem tempo hábil, a verificação de referências é feita atropelada ou simplesmente omitida.</p>
+                    </div>
+                    <div class="card warn">
+                        <div class="clabel">A raiz do problema</div>
+                        <div class="ctitle">O gargalo é comportamental, não tecnológico</div>
+                        <p class="cdesc mt-8">Fornecedores vivem no WhatsApp — não em portais. Qualquer solução que exija que eles se adaptem vai ter baixa aderência. A dgenny® vai onde o fornecedor já está.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Sem vs Com dgenny - Cotação -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Sem dgenny × Com dgenny</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Processo de Cotação</h2>
+                <p class="sub sub-md mt-12">Da dependência humana à automação que libera a equipe para negociar de verdade</p>
+
+                <table class="dtable mt-28">
+                    <thead>
+                        <tr>
+                            <th>Processo</th>
+                            <th>Sem dgenny — hoje</th>
+                            <th></th>
+                            <th>Com dgenny®</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Disparo de cotação para fornecedores</td>
+                            <td>Manual — um a um no WhatsApp</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Simultâneo — todos de uma vez</td>
+                        </tr>
+                        <tr>
+                            <td>Abertura de fornecedores em nova cidade</td>
+                            <td>Google manual → WhatsApp individual</td>
+                            <td style="text-align:center;">→</td>
+                            <td>dgenny® busca e aciona automaticamente</td>
+                        </tr>
+                        <tr>
+                            <td>Follow-up com fornecedores sem resposta</td>
+                            <td>100% manual — ou esquece</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Automático — dgenny® cobra por conta própria</td>
+                        </tr>
+                        <tr>
+                            <td>Pedido urgente recebido sexta às 17h</td>
+                            <td>Começa na segunda-feira</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Agendado na sexta — dispara no sábado</td>
+                        </tr>
+                        <tr>
+                            <td>Erros de especificação (item errado, unidade errada)</td>
+                            <td>Descobertos na equalização — tarde demais</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Corrigidos em tempo real com o fornecedor</td>
+                        </tr>
+                        <tr>
+                            <td>Fornecedores por cotação</td>
+                            <td>3–4 primeiros que respondem</td>
+                            <td style="text-align:center;">→</td>
+                            <td>10–30 simultâneos, ranking por avaliação</td>
+                        </tr>
+                        <tr>
+                            <td>Pré-homologação (CNPJ + referência comercial)</td>
+                            <td>Feita atropelada ou omitida</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Solicitada pela dgenny® junto à cotação</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="g2 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Impacto atual</div>
+                        <div class="ctitle">Pressão que acumula todo dia</div>
+                        <p class="cdesc mt-8">Michael e Bruna consomem o dia abrindo cotações, fazendo follow-up e equalizando manualmente — sem espaço para negociar melhor ou verificar fornecedores com cuidado</p>
+                    </div>
+                    <div class="card success">
+                        <div class="clabel">Com dgenny®</div>
+                        <div class="ctitle">Equipe foca na decisão de compra</div>
+                        <p class="cdesc mt-8">dgenny® faz o braçal — a equipe recebe o mapa pronto, equalizado, com ranking e transcrição. Decisão com qualidade — negociação estratégica, não "apagar fogo".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Sem vs Com dgenny - Mapa de Cotação -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Sem dgenny × Com dgenny</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Mapa de Cotação e Saving</h2>
+                <p class="sub sub-md mt-12">De equalização manual e demorada a comparativo pronto para decisão</p>
+
+                <div class="g2 mt-28">
+                    <div>
+                        <h3 class="hl hl-md c-red">Sem dgenny — Hoje</h3>
+                        <div class="chk bad mt-16">
+                            <span>✗</span>
+                            <span>Mapa montado manualmente após receber todas as respostas</span>
+                        </div>
+                        <div class="chk bad mt-12">
+                            <span>✗</span>
+                            <span>Erros de especificação descobertos só na montagem do mapa</span>
+                        </div>
+                        <div class="chk bad mt-12">
+                            <span>✗</span>
+                            <span>Fecha com os 3–4 primeiros — sem esperar mais propostas</span>
+                        </div>
+                        <div class="chk bad mt-12">
+                            <span>✗</span>
+                            <span>Preço meta de licitação controlado manualmente por obra</span>
+                        </div>
+                        <div class="chk bad mt-12">
+                            <span>✗</span>
+                            <span>Saving calculado manualmente, sem referência histórica</span>
+                        </div>
+                        <div class="chk bad mt-12">
+                            <span>✗</span>
+                            <span>Histórico disperso no WhatsApp — impossível auditar</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="hl hl-md c-green">Com dgenny® — Amanhã</h3>
+                        <div class="chk good mt-16">
+                            <span>✓</span>
+                            <span>Mapa gerado automaticamente em Excel ou PDF</span>
+                        </div>
+                        <div class="chk good mt-12">
+                            <span>✓</span>
+                            <span>Equalização em tempo real — dgenny® corrige o fornecedor antes de fechar</span>
+                        </div>
+                        <div class="chk good mt-12">
+                            <span>✓</span>
+                            <span>10–30 propostas simultâneas — ranking por menor preço</span>
+                        </div>
+                        <div class="chk good mt-12">
+                            <span>✓</span>
+                            <span>Campo de meta de cotação por item — dgenny® negocia até chegar lá</span>
+                        </div>
+                        <div class="chk good mt-12">
+                            <span>✓</span>
+                            <span>Saving calculado automaticamente sobre o melhor preço coletado</span>
+                        </div>
+                        <div class="chk good mt-12">
+                            <span>✓</span>
+                            <span>Transcrição completa de cada negociação — rastreabilidade total</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card rosa mt-28">
+                    <div class="clabel">O que muda para a Espala nas licitações</div>
+                    <p class="cdesc">Cada obra da Espala tem uma margem comprometida na licitação. Com a dgenny® negociando até o preço-meta antes de fechar, a equipe tem mais chances de cumprir a margem prometida — sem correr atrás de desconto na hora da urgência.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: A Alavanca Estratégica -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">A Alavanca Estratégica</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O trabalho que nunca acontece</h2>
+                <p class="sub sub-md mt-12">Enquanto o operacional consome o dia, o que não é feito acumula custo invisível</p>
+
+                <div class="card danger mt-28" style="border-left: 3px solid #ff8080;">
+                    <div class="clabel">O que Michael realmente quer fazer — e não consegue</div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.6; font-style: italic;">"O departamento de suprimentos não é só batedor de pedido. É um departamento estratégico, onde que o lucro da empresa é dependente. A negociação poderia melhorar muito mais. A gente mais solto — tanto eu quanto a Bruna — para negociar ficaria muito melhor."</p>
+                </div>
+
+                <div class="g2 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Hoje — preso no braçal</div>
+                        <div class="ctitle">Michael no operacional de cotação</div>
+                        <p class="cdesc mt-8">Gestor que cuida de Suprimentos, Apex (locadora) e frotas da empresa — mas consome o dia em cotações manuais ao lado de Bruna. Sem tempo para gerenciar estrategicamente nenhuma das frentes.</p>
+                    </div>
+                    <div class="card success">
+                        <div class="clabel">Com dgenny® — no estratégico</div>
+                        <div class="ctitle">Michael no gerencial que gera margem</div>
+                        <p class="cdesc mt-8">Com o braçal automatizado, Michael e Bruna focam em negociações de alto valor, homologação real de fornecedores, levantamento de preço para licitação e gestão de Apex e frotas.</p>
+                    </div>
+                </div>
+
+                <div class="g3 mt-20">
+                    <div class="card roxo">
+                        <div class="ctitle">Negociação agressiva</div>
+                        <p class="cdesc mt-8">Tempo para ir além do preço — prazo de pagamento, entrega fracionada, condições especiais por volume de obra</p>
+                    </div>
+                    <div class="card roxo">
+                        <div class="ctitle">Homologação real</div>
+                        <p class="cdesc mt-8">Verificar referências comerciais com qualidade — sem atropelar por falta de tempo. Sem cair em golpe.</p>
+                    </div>
+                    <div class="card roxo">
+                        <div class="ctitle">Levantamento para licitação</div>
+                        <p class="cdesc mt-8">Usar a dgenny® para estimar preços antes de fechar uma licitação — saber a margem real antes de comprometer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Transformação Operacional -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Impacto Operacional</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Transformação na Espala</h2>
+                <p class="sub sub-md mt-12">O que muda no dia a dia — mesma equipe, resultado diferente</p>
+
+                <table class="dtable mt-20">
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>Hoje</th>
+                            <th></th>
+                            <th>Com dgenny®</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Disparo de cotação para fornecedores</td>
+                            <td>Manual, horas por ciclo</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Automático, minutos</td>
+                        </tr>
+                        <tr>
+                            <td>Follow-up com fornecedores sem resposta</td>
+                            <td>100% manual ou omitido</td>
+                            <td style="text-align:center;">→</td>
+                            <td>0% — dgenny® age sozinha</td>
+                        </tr>
+                        <tr>
+                            <td>Abertura de fornecedores em nova cidade</td>
+                            <td>Google → WhatsApp individual</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Busca automática + disparo simultâneo</td>
+                        </tr>
+                        <tr>
+                            <td>Equalização de propostas</td>
+                            <td>Manual após receber tudo</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Em tempo real, com correção automática</td>
+                        </tr>
+                        <tr>
+                            <td>Fornecedores por cotação</td>
+                            <td>3–4 (primeiros que respondem)</td>
+                            <td style="text-align:center;">→</td>
+                            <td>10–30 simultâneos com ranking</td>
+                        </tr>
+                        <tr>
+                            <td>Pedido urgente sexta às 17h</td>
+                            <td>Começa segunda-feira</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Agendado — dispara no sábado</td>
+                        </tr>
+                        <tr>
+                            <td>Rastreabilidade das negociações</td>
+                            <td>Zero — WhatsApp disperso</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Total — transcrição + histórico centralizado</td>
+                        </tr>
+                        <tr>
+                            <td>Michael no operacional de cotação</td>
+                            <td>Diário — ao lado de Bruna</td>
+                            <td style="text-align:center;">→</td>
+                            <td>Gerencial — Apex, frotas, estratégia</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="g3 mt-24">
+                    <div class="card roxo">
+                        <div class="bnum c-roxo">-80%</div>
+                        <div class="ctitle">Operacional eliminado</div>
+                        <p class="cdesc mt-8">do tempo em tarefas repetitivas de cotação</p>
+                    </div>
+                    <div class="card roxo">
+                        <div class="bnum c-roxo">10×+</div>
+                        <div class="ctitle">Mais fornecedores</div>
+                        <p class="cdesc mt-8">contactados por cotação — em qualquer cidade</p>
+                    </div>
+                    <div class="card roxo">
+                        <div class="bnum c-roxo">0</div>
+                        <div class="ctitle">Pessoas substituídas</div>
+                        <p class="cdesc mt-8">A equipe fica — e fica muito mais estratégica</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Para o Diretor -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Para o Diretor</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O argumento para quem decide</h2>
+                <p class="sub sub-md mt-12">Cada obra da Espala tem uma margem comprometida na licitação. O custo de não comprar bem vai direto para o resultado.</p>
+
+                <div class="g2 mt-28">
+                    <div class="roi-box">
+                        <div class="roi-num">5–10%</div>
+                        <div class="roi-lbl">de saving perdido em cada compra urgente — direto para o custo da obra</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 13px;">
+                        <div class="card roxo">
+                            <div class="clabel">Escala com crescimento</div>
+                            <div class="ctitle">Mais obras — mesma equipe</div>
+                            <p class="cdesc mt-8">A dgenny® absorve o crescimento da Espala sem aumentar a equipe proporcionalmente. 20 obras hoje, 40 amanhã — o processo acompanha sem criar mais pressão.</p>
+                        </div>
+                        <div class="card success">
+                            <div class="clabel">IA que já está em campo</div>
+                            <div class="ctitle">55+ construtoras usando hoje</div>
+                            <p class="cdesc mt-8">Mais de um ano de operação real. Saving realizado de 5% a 12% com uso constante. Não é promessa — é histórico de clientes ativos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="g3 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Risco atual</div>
+                        <div class="ctitle">Processo vive nas pessoas</div>
+                        <p class="cdesc mt-8">Se Michael ou Bruna saírem, o processo para. Sem rastreabilidade, sem histórico — o próximo recomeça do zero.</p>
+                    </div>
+                    <div class="card warn">
+                        <div class="clabel">Risco de crescimento</div>
+                        <div class="ctitle">Mais obras = mais pressão</div>
+                        <p class="cdesc mt-8">Sem a dgenny®, cada nova obra adiciona pressão no mesmo gargalo. O crescimento da Espala se torna o maior inimigo do setor de suprimentos.</p>
+                    </div>
+                    <div class="card success">
+                        <div class="clabel">Com dgenny®</div>
+                        <div class="ctitle">Operação resiliente e auditável</div>
+                        <p class="cdesc mt-8">Processo sistematizado, independente de quem está na equipe. Todo histórico centralizado — qualquer compra pode ser auditada a qualquer momento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Custo de Oportunidade -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Análise</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O que fica na mesa todo mês</h2>
+                <p class="sub sub-md mt-12">O custo invisível do processo atual — que vai direto para a margem das obras licitadas</p>
+
+                <table class="dtable mt-20">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Impacto</th>
+                            <th>Consequência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="sub-head red">
+                            <td colspan="3">CUSTO DE TEMPO OPERACIONAL</td>
+                        </tr>
+                        <tr>
+                            <td>Michael + Bruna no operacional de cotação diário</td>
+                            <td class="amt">~80% do dia</td>
+                            <td class="amt">Gestão estratégica bloqueada</td>
+                        </tr>
+                        <tr>
+                            <td>Follow-up manual com fornecedores sem resposta</td>
+                            <td class="amt">Horas/semana</td>
+                            <td class="amt">Cotações incompletas, menos opções</td>
+                        </tr>
+                        <tr>
+                            <td>Equalização manual do mapa de cotação</td>
+                            <td class="amt">Horas/ciclo</td>
+                            <td class="amt">Erros descobertos tarde, retrabalho</td>
+                        </tr>
+                        <tr class="sub-head red">
+                            <td colspan="3">CUSTO DE OPORTUNIDADE NAS COMPRAS</td>
+                        </tr>
+                        <tr>
+                            <td>Pedidos urgentes — negociação atropelada</td>
+                            <td class="amt">5–10% por pedido</td>
+                            <td class="amt">Saving que vai para o custo da obra</td>
+                        </tr>
+                        <tr>
+                            <td>Apenas 3–4 fornecedores (quem responde primeiro)</td>
+                            <td class="amt neu">Menor competição</td>
+                            <td class="amt neu">Preços sem benchmark real de mercado</td>
+                        </tr>
+                        <tr>
+                            <td>Nova cidade = abertura manual de fornecedores</td>
+                            <td class="amt">Dias de trabalho</td>
+                            <td class="amt">Cadastros atrasam início das compras</td>
+                        </tr>
+                        <tr class="sub-head red">
+                            <td colspan="3">RISCO OPERACIONAL E DE LICITAÇÃO</td>
+                        </tr>
+                        <tr>
+                            <td>Histórico disperso no WhatsApp — sem auditoria</td>
+                            <td class="amt">Não quantificado</td>
+                            <td class="amt">Impossível revisitar, recorrer ou replicar</td>
+                        </tr>
+                        <tr>
+                            <td>Processo dependente de Michael e Bruna</td>
+                            <td class="amt">Alto risco</td>
+                            <td class="amt">Saída de qualquer um paralisa a operação</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="card rosa mt-20">
+                    <div class="clabel">A decisão que importa</div>
+                    <p class="cdesc">Cada semana que passa com o processo atual é mais pedido urgente sem negociação real e mais saving que vai para o custo das obras. A dgenny® não exige mudança de ERP, não substitui ninguém — e começa no WhatsApp que a equipe já usa.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Próximos Passos -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="eyebrow">Ação</div>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Próximos Passos</h2>
+                <p class="sub sub-md mt-12">A decisão que transforma o suprimentos da Espala</p>
+                <p class="sub sub-md mt-12">Cada semana com o processo atual é mais tempo de Michael e Bruna no operacional, mais pedidos urgentes sem negociação real e mais saving que fica na mesa — indo direto para o custo das obras.</p>
+
+                <div class="g3 mt-32">
+                    <div class="next-step-card">
+                        <div class="nsc-num">PASSO 1</div>
+                        <div class="nsc-title">Michael mapeia o fluxo</div>
+                        <div class="nsc-desc">Desenhar onde a dgenny® encaixa, o que muda e o que fica igual — pros, contras e pontos de atenção identificados na demonstração ao vivo</div>
+                        <div class="nsc-date">→ Esta semana (17–21 de junho)</div>
+                    </div>
+                    <div class="next-step-card">
+                        <div class="nsc-num">PASSO 2</div>
+                        <div class="nsc-title">Apresentação ao Diretor</div>
+                        <div class="nsc-desc">Michael apresenta o mapeamento e os valores da dgenny® para o diretor — análise conjunta de viabilidade e decisão de avançar para reunião executiva</div>
+                        <div class="nsc-date">→ Semana de 23 de junho (diretor retorna da viagem)</div>
+                    </div>
+                    <div class="next-step-card">
+                        <div class="nsc-num">PASSO 3</div>
+                        <div class="nsc-title">Demo + Proposta para o Diretor</div>
+                        <div class="nsc-desc">Reunião com Diretor, Michael e Bruna — demo ao vivo com o cenário real da Espala e proposta personalizada com valores, ROI e condições de implantação</div>
+                        <div class="nsc-date">→ Assim que o Diretor confirmar agenda</div>
+                    </div>
+                </div>
+
+                <div class="card rosa mt-32">
+                    <div class="clabel">O que a dgenny® entrega para essa reunião</div>
+                    <p class="cdesc">Proposta com valores detalhados + estimativa de saving com base no volume de compras da Espala + análise de integração com o UAW (reunião com o time da W se necessário). Tudo que o Diretor precisa para decidir.</p>
+                </div>
+
+                <div class="hl hl-md mt-24" style="text-align: center;">
+                    Compre melhor. Escale mais. Liberte sua equipe.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-btn" onclick="prevSlide()">← Anterior</button>
+        <div class="slide-counter"><span id="counter">1 / 11</span></div>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let cur = 0;
+        const total = slides.length;
+        function update() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+            document.getElementById('counter').textContent = (cur + 1) + ' / ' + total;
+            document.getElementById('progressBar').style.width = ((cur + 1) / total * 100) + '%';
+        }
+        function nextSlide() { if (cur < total - 1) { cur++; update(); } }
+        function prevSlide() { if (cur > 0) { cur--; update(); } }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        });
+        let _tx = 0, _ty = 0;
+        document.addEventListener('touchstart', function(e) { _tx = e.touches[0].clientX; _ty = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', function(e) {
+            const dx = e.changedTouches[0].clientX - _tx;
+            const dy = e.changedTouches[0].clientY - _ty;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
+                if (dx < 0) nextSlide(); else prevSlide();
+            }
+        }, { passive: true });
+        update();
+    </script>
+</body>
+</html>
