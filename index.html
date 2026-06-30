@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Comparativo — dgenny® · Espala Engenharia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --azul: #121325;
+            --roxo: #6660B4;
+            --rosa: #FFBEF5;
+            --white: #FFFFFF;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0d0e1f;
+            font-family: 'Quicksand', Arial, sans-serif;
+        }
+
+        .deck {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            background: var(--azul);
+            color: var(--white);
+            padding: 46px 66px 68px;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 65% 65% at 95% 5%, rgba(102, 96, 180, 0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 45% 45% at 5% 95%, rgba(255, 190, 245, 0.06) 0%, transparent 70%);
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 52px;
+            background: rgba(12, 13, 28, 0.97);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 999;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-btn {
+            background: rgba(102, 96, 180, 0.18);
+            border: 1px solid rgba(102, 96, 180, 0.38);
+            color: #fff;
+            padding: 7px 22px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--roxo);
+            border-color: var(--roxo);
+        }
+
+        .slide-counter {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--roxo), var(--rosa));
+            transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            border-radius: 0 2px 2px 0;
+        }
+
+        .logo {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-ico {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--rosa);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--azul);
+        }
+
+        .logo-reg {
+            font-size: 8px;
+            vertical-align: super;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .slide-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 34px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            color: var(--roxo);
+            background: rgba(102, 96, 180, 0.12);
+            border: 1px solid rgba(102, 96, 180, 0.24);
+            padding: 5px 14px;
+            border-radius: 50px;
+        }
+
+        .eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2.2px;
+            text-transform: uppercase;
+            color: var(--roxo);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .hl {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 800;
+            line-height: 1.1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hl-xl { font-size: 48px; }
+        .hl-lg { font-size: 36px; }
+        .hl-md { font-size: 26px; }
+
+        .sub {
+            font-family: 'Quicksand', sans-serif;
+            color: rgba(255, 255, 255, 0.52);
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sub-lg { font-size: 19px; }
+        .sub-md { font-size: 14px; }
+
+        .c-rosa { color: var(--rosa); }
+        .c-roxo { color: #8078d4; }
+        .c-green { color: #64e080; }
+        .c-red { color: #ff8080; }
+
+        .mt-8 { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
+        .mt-16 { margin-top: 16px; }
+        .mt-20 { margin-top: 20px; }
+        .mt-24 { margin-top: 24px; }
+        .mt-28 { margin-top: 28px; }
+        .mt-32 { margin-top: 32px; }
+        .mt-40 { margin-top: 40px; }
+
+        .content {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fn {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.25);
+            position: relative;
+            z-index: 1;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card.roxo { background: rgba(102, 96, 180, 0.1); border-color: rgba(102, 96, 180, 0.22); }
+        .card.rosa { background: rgba(255, 190, 245, 0.06); border-color: rgba(255, 190, 245, 0.18); }
+        .card.danger { background: rgba(255, 80, 80, 0.07); border-color: rgba(255, 80, 80, 0.18); }
+        .card.success { background: rgba(80, 220, 120, 0.07); border-color: rgba(80, 220, 120, 0.18); }
+        .card.warn { background: rgba(255, 180, 50, 0.07); border-color: rgba(255, 180, 50, 0.2); }
+
+        .clabel {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 7px;
+        }
+
+        .ctitle {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .cdesc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.48);
+            line-height: 1.55;
+        }
+
+        .bnum {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 34px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; position: relative; z-index: 1; }
+        .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px; position: relative; z-index: 1; }
+        .g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; position: relative; z-index: 1; }
+
+        .dtable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dtable th {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.33);
+            padding: 9px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .dtable td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            vertical-align: middle;
+        }
+
+        .dtable tr:last-child td { border-bottom: none; }
+
+        .dtable .amt {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            text-align: right;
+            color: #ff8080;
+        }
+
+        .dtable .amt.pos { color: #64e080; }
+        .dtable .amt.neu { color: var(--rosa); }
+
+        .dtable .sub-head td {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding-top: 13px;
+            padding-bottom: 3px;
+            border-bottom: none;
+        }
+
+        .dtable .sub-head.red td { color: rgba(255, 80, 80, 0.6); }
+        .dtable .sub-head.grn td { color: rgba(100, 224, 128, 0.6); }
+
+        .dtable .total-row td {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--rosa);
+            font-size: 14px;
+            background: rgba(255, 190, 245, 0.05);
+            border-top: 1px solid rgba(255, 190, 245, 0.18);
+            border-bottom: none;
+        }
+
+        .chk {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 11px 13px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.68);
+        }
+
+        .chk.bad { background: rgba(255, 80, 80, 0.06); border: 1px solid rgba(255, 80, 80, 0.14); }
+        .chk.good { background: rgba(80, 220, 120, 0.06); border: 1px solid rgba(80, 220, 120, 0.14); }
+        .chk.lock { background: rgba(255, 180, 50, 0.06); border: 1px solid rgba(255, 180, 50, 0.14); }
+
+        .mrow {
+            display: grid;
+            grid-template-columns: 1fr 105px 26px 105px;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .mrow:last-child { border-bottom: none; }
+        .mrow .ml { font-size: 14px; color: rgba(255, 255, 255, 0.7); }
+        .mrow .mb { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: #ff8080; text-align: center; }
+        .mrow .ma { font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; color: #64e080; text-align: center; }
+        .mrow .mar { color: rgba(255, 255, 255, 0.2); font-size: 13px; text-align: center; }
+
+        .roi-box {
+            background: linear-gradient(135deg, rgba(102, 96, 180, 0.2), rgba(255, 190, 245, 0.08));
+            border: 1px solid rgba(102, 96, 180, 0.28);
+            border-radius: 18px;
+            padding: 26px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .roi-num {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 66px;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, #8078d4, var(--rosa));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+        }
+
+        .roi-lbl {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 6px;
+        }
+
+        .stepbox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 9px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stepnum {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(102, 96, 180, 0.15);
+            border: 2px solid var(--roxo);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--roxo);
+        }
+
+        .steptitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .stepdesc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.5;
+        }
+
+        .flow7 {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .f7step {
+            flex: 1;
+            padding: 12px 6px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .f7step.pain { background: rgba(255, 80, 80, 0.07); border-color: rgba(255, 80, 80, 0.2); }
+        .f7step.dg { background: rgba(102, 96, 180, 0.14); border-color: rgba(102, 96, 180, 0.3); }
+        .f7step.lock { background: rgba(255, 180, 50, 0.07); border-color: rgba(255, 180, 50, 0.2); }
+
+        .f7step .fnum { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.3); }
+        .f7step .fname { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: rgba(255, 255, 255, 0.9); line-height: 1.2; }
+        .f7step .fdesc { font-size: 11px; color: rgba(255, 255, 255, 0.4); }
+        .f7step .ftag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-top: 2px; display: inline-block; }
+
+        .ftag.red { color: #ff8080; background: rgba(255, 80, 80, 0.12); }
+        .ftag.roxo { color: #a09ce8; background: rgba(102, 96, 180, 0.18); }
+        .ftag.oran { color: #ffb84d; background: rgba(255, 180, 50, 0.15); }
+        .ftag.grn { color: #64e080; background: rgba(80, 220, 120, 0.15); }
+
+        .farr { color: rgba(102, 96, 180, 0.4); font-size: 14px; display: flex; align-items: center; padding: 0 3px; flex-shrink: 0; }
+
+        .nsc {
+            background: rgba(102, 96, 180, 0.1);
+            border: 1px solid rgba(102, 96, 180, 0.3);
+            border-radius: 14px;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nsc.highlight {
+            background: linear-gradient(135deg, rgba(102, 96, 180, 0.2), rgba(255, 190, 245, 0.08));
+            border: 1px solid rgba(255, 190, 245, 0.28);
+        }
+
+        .nsc .nnum {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255, 190, 245, 0.5);
+        }
+
+        .nsc .nt {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.2;
+        }
+
+        .nsc .nd {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.5;
+        }
+
+        .nsc .na {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--rosa);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .slide { padding: 28px 34px 62px; }
+            .hl-xl { font-size: 32px; }
+            .hl-lg { font-size: 24px; }
+            .hl-md { font-size: 20px; }
+            .sub-lg { font-size: 16px; }
+            .g3 { grid-template-columns: 1fr 1fr; }
+            .g4 { grid-template-columns: 1fr 1fr; }
+            .roi-num { font-size: 48px; }
+            .bnum { font-size: 26px; }
+            .flow7 { overflow-x: auto; padding-bottom: 8px; }
+            .f7step { min-width: 80px; }
+            .mrow { grid-template-columns: 1fr 80px 20px 80px; }
+        }
+
+        @media (max-width: 600px) {
+            .slide { padding: 16px 16px 76px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+            .hl-xl { font-size: 22px; line-height: 1.2; }
+            .hl-lg { font-size: 18px; line-height: 1.2; }
+            .hl-md { font-size: 15px; }
+            .sub-lg { font-size: 13px; }
+            .sub-md { font-size: 12px; }
+            .eyebrow { font-size: 9px; letter-spacing: 1.5px; margin-bottom: 6px; }
+            .tag { font-size: 9px; padding: 4px 10px; letter-spacing: 1px; }
+            .slide-top { margin-bottom: 12px; }
+            .logo { font-size: 13px; }
+            .logo-ico { width: 18px; height: 18px; font-size: 9px; }
+            .g2, .g3, .g4 { grid-template-columns: 1fr; }
+            .flow7 { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+            .f7step { min-width: 76px; padding: 8px 4px; }
+            .mrow { grid-template-columns: 1fr 68px 18px 68px; gap: 5px; }
+            .mrow .ml, .mrow .mb, .mrow .ma { font-size: 11px; }
+            .roi-num { font-size: 40px; }
+            .roi-box { padding: 18px; }
+            .bnum { font-size: 22px; }
+            .nav-bar { height: 60px; gap: 12px; }
+            .nav-btn { padding: 11px 22px; font-size: 14px; }
+            .card { padding: 12px; }
+            .ctitle { font-size: 12px; }
+            .cdesc { font-size: 11px; }
+            .chk { font-size: 11px; padding: 9px 10px; gap: 8px; }
+            .dtable { font-size: 11px; }
+            .dtable th { font-size: 9px; padding: 7px 6px; }
+            .dtable td { padding: 8px 6px; }
+            .mt-40, .mt-36, .mt-32 { margin-top: 16px; }
+            .mt-28, .mt-24 { margin-top: 13px; }
+            .mt-20 { margin-top: 11px; }
+        }
+
+        @media print {
+            body { overflow: visible; }
+            .slide { position: relative !important; display: flex !important; page-break-after: always; height: 100vh; }
+            .nav-bar, .progress-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="deck">
+
+        <!-- SLIDE 1: COVER -->
+        <div class="slide active">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <div class="tag">Confidencial</div>
+            </div>
+            <div class="content">
+                <h1 class="hl hl-xl mt-40">Mapa Comparativo<br><span class="c-roxo">Espala Engenharia</span></h1>
+                <p class="sub sub-lg mt-32">O que muda — e o que se ganha —<br>com a decisão certa.</p>
+                <div class="card roxo mt-40">
+                    <div class="clabel">O custo do processo atual e o que a dgenny® transforma — sem substituir ninguém da equipe.</div>
+                </div>
+                <div class="fn mt-40">
+                    <strong>Espala Engenharia · Suprimentos</strong><br>
+                    Preparado pela dgenny® · Junho de 2026
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: DIAGNÓSTICO -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Diagnóstico</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Como funciona hoje</h2>
+                <p class="sub sub-md mt-8">Processo estruturado no UAL + Construcompras — mas com gargalo operacional total nas etapas de cotação e equalização, ainda 100% manuais.</p>
+                <div class="flow7 mt-20">
+                    <div class="f7step">
+                        <div class="fnum">01</div>
+                        <div class="fname">Solicitação</div>
+                        <div class="fdesc">Obra ou setor solicita via UAL</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">02</div>
+                        <div class="fname">Aprovação</div>
+                        <div class="fdesc">Engenharia + diretoria aprovam</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step pain">
+                        <div class="fnum">03</div>
+                        <div class="fname">Cotação</div>
+                        <div class="fdesc">WhatsApp manual — 3+ fornecedores</div>
+                        <div class="ftag red">Gargalo</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step pain">
+                        <div class="fnum">04</div>
+                        <div class="fname">Equalização</div>
+                        <div class="fdesc">Mapa montado manualmente</div>
+                        <div class="ftag red">Manual</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">05</div>
+                        <div class="fname">Aprovação</div>
+                        <div class="fdesc">Michael aprova via WhatsApp</div>
+                    </div>
+                    <div class="farr">→</div>
+                    <div class="f7step">
+                        <div class="fnum">06</div>
+                        <div class="fname">Ordem de Compra</div>
+                        <div class="fdesc">OC gerada e enviada à obra</div>
+                    </div>
+                </div>
+                <div class="g3 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Volume atual</div>
+                        <div class="ctitle">10–15 cotações/dia</div>
+                        <div class="cdesc">Para 2 compradores, em 20+ obras espalhadas por cidades do interior de SP — com Michael ainda no operacional</div>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Urgências interrompem tudo</div>
+                        <div class="ctitle">Negociação sacrificada</div>
+                        <div class="cdesc">Pedidos urgentes forçam parar negociações em andamento — a equipe perde de 5–10% de saving por cotação interrompida</div>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Integração pendente</div>
+                        <div class="ctitle">UAL sem API pública</div>
+                        <div class="cdesc">Construcompras funciona, mas UAL não tem integração confirmada — listas de itens ainda precisam ser tratadas manualmente</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: A DOR CENTRAL -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">A Dor Central</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">A equipe que apaga fogo — e nunca chega à estratégia</h2>
+                <div class="card danger mt-20">
+                    <div class="clabel">Michael Dias da Silva — Reunião de 17/06/2026</div>
+                    <p class="sub sub-lg mt-8" style="color: rgba(255,255,255,0.75); font-style: italic;">"A gente fica muito apagando fogo. Você fazer uma compra construtiva, bem negociada — cara, aquela que você fala: consegui. Acho que o departamento de suprimentos não é só batedor de pedido. É o departamento estratégico, onde o resto da empresa é dependente."</p>
+                </div>
+                <div class="g3 mt-24">
+                    <div class="card">
+                        <div class="bnum c-red" style="font-size: 40px;">20+</div>
+                        <div class="steptitle mt-8">obras simultâneas</div>
+                        <div class="cdesc mt-8">SP, Campinas, Botucatu, Leme, Araras, Piracicaba, São Carlos, Santa Bárbara, Americana — e crescendo</div>
+                    </div>
+                    <div class="card">
+                        <div class="bnum c-red" style="font-size: 40px;">300+</div>
+                        <div class="steptitle mt-8">cotações/mês</div>
+                        <div class="cdesc mt-8">10–15 por dia, todas disparadas manualmente por 2 compradores — Michael ainda no operacional por falta de capacidade</div>
+                    </div>
+                    <div class="card">
+                        <div class="bnum c-red" style="font-size: 40px;">16k</div>
+                        <div class="steptitle mt-8">insumos/ano</div>
+                        <div class="cdesc mt-8">Volume que cresce com novas obras — sem automação, mais obras = mais pressão sobre as mesmas 2 pessoas</div>
+                    </div>
+                </div>
+                <div class="card warn mt-20">
+                    <strong style="color: #ffb84d;">O ciclo vicioso:</strong><span style="color: rgba(255,255,255,0.6);"> Urgência interrompe negociação → negociação perde 5–10% de saving → comprador volta ao braçal → nova urgência chega. A equipe nunca sai desse loop sem uma ferramenta que quebre o ciclo.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: POR QUE O PROBLEMA PERSISTE -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Por Que o Problema Persiste</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Mais obras não resolvem — agravam</h2>
+                <p class="sub sub-md mt-8">O processo de cotação da Espala funciona para 5 obras. Com 20+, ele sufoca.</p>
+                <div class="g2 mt-24">
+                    <div class="card danger">
+                        <div class="clabel">Por que o Construcompras não resolve</div>
+                        <div style="margin-top: 12px;">
+                            <div class="chk bad mt-8">✗ Fornecedores de outras cidades não preenchem o portal</div>
+                            <div class="chk bad mt-8">✗ Aderência baixa fora do Sudeste consolidado</div>
+                            <div class="chk bad mt-8">✗ Cotação continua voltando para o WhatsApp manual</div>
+                            <div class="chk bad mt-8">✗ Não faz follow-up automático com quem não responde</div>
+                            <div class="chk bad mt-8">✗ Não abre novos fornecedores na cidade da nova obra</div>
+                        </div>
+                    </div>
+                    <div class="card danger">
+                        <div class="clabel">Por que aumentar a equipe não resolve</div>
+                        <div style="margin-top: 12px;">
+                            <div class="chk bad mt-8">✗ Comprador novo demora 6+ meses para render</div>
+                            <div class="chk bad mt-8">✗ Custo de R$3,5k–5k/mês + encargos + risco de rescisão</div>
+                            <div class="chk bad mt-8">✗ Mesmo processo braçal — só com mais mãos</div>
+                            <div class="chk bad mt-8">✗ Michael continua no operacional de supervisão</div>
+                            <div class="chk bad mt-8">✗ Próxima nova obra volta a pressionar</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card roxo mt-24">
+                    <strong>O gargalo é comportamental, não de headcount:</strong><span style="color: rgba(255,255,255,0.6);"> Fornecedores vivem no WhatsApp, não em portais. A dgenny® resolve exatamente onde o problema acontece — WhatsApp automatizado, cotação simultânea, equalização instantânea. Sem mudar o comportamento de ninguém.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: SEM × COM DGENNY (PROCESSO) -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Sem Dgenny × Com Dgenny</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Processo de Cotação</h2>
+                <p class="sub sub-md mt-8">Da negociação sacrificada pela urgência à cotação paralela que liberta o comprador</p>
+                <div style="display: grid; grid-template-columns: 1fr 105px 26px 105px; gap: 10px; margin-top: 24px; padding: 0 0 8px; border-bottom: 1px solid rgba(255,255,255,0.07); position: relative; z-index: 1;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3);">Processo</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #ff8080; text-align: center;">Sem Dgenny</div>
+                    <div></div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #64e080; text-align: center;">Com Dgenny</div>
+                </div>
+                <div class="mrow"><div class="ml">Disparo de cotação para fornecedores</div><div class="mb">Um a um, manual</div><div class="mar">→</div><div class="ma">Simultâneo — todos de uma vez</div></div>
+                <div class="mrow"><div class="ml">Abertura de fornecedores em nova cidade</div><div class="mb">Google + WhatsApp manual</div><div class="mar">→</div><div class="ma">Busca automática na internet</div></div>
+                <div class="mrow"><div class="ml">Follow-up com fornecedor sem resposta</div><div class="mb">100% manual</div><div class="mar">→</div><div class="ma">Automático pela dgenny®</div></div>
+                <div class="mrow"><div class="ml">Equalização do mapa de cotação</div><div class="mb">Planilha manual</div><div class="mar">→</div><div class="ma">PDF + Excel automático</div></div>
+                <div class="mrow"><div class="ml">Item errado / unidade diferente detectado</div><div class="mb">Só na hora do mapa</div><div class="mar">→</div><div class="ma">Durante a negociação</div></div>
+                <div class="mrow"><div class="ml">Cotação recebida sexta à tarde</div><div class="mb">Começa segunda-feira</div><div class="mar">→</div><div class="ma">Agendada p/ sábado — propostas na segunda</div></div>
+                <div class="g2 mt-20">
+                    <div class="card danger">
+                        <div class="clabel">Impacto hoje</div>
+                        <div class="ctitle">Urgência sacrifica o saving</div>
+                        <div class="cdesc">Quando urgência chega, a negociação em andamento para. A dgenny® conduz as duas ao mesmo tempo — sem interromper nenhuma</div>
+                    </div>
+                    <div class="card success">
+                        <div class="clabel">Com dgenny®</div>
+                        <div class="ctitle">Comprador foca na decisão</div>
+                        <div class="cdesc">A dgenny® faz o operacional — dispara, cobra, equaliza. Bruna e Maris focam em negociar melhor e fechar a compra certa</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: SEM × COM DGENNY (HOMOLOGAÇÃO) -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Sem Dgenny × Com Dgenny</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">Homologação e Novos Fornecedores</h2>
+                <p class="sub sub-md mt-8">De risco de golpe por falta de tempo à pré-qualificação embutida no processo</p>
+                <div class="g2 mt-20">
+                    <div class="card danger">
+                        <div class="clabel">Sem Dgenny — Hoje</div>
+                        <div style="margin-top: 12px;">
+                            <div class="chk bad mt-8">✗ Google manual para encontrar fornecedores em cada cidade</div>
+                            <div class="chk bad mt-8">✗ Sem tempo para verificar CNPJ, referências e avaliações</div>
+                            <div class="chk bad mt-8">✗ Risco de golpe — "site bonitinho que no final é fraude"</div>
+                            <div class="chk bad mt-8">✗ Dependência de poucos fornecedores conhecidos</div>
+                            <div class="chk bad mt-8">✗ Urgências eliminam qualquer chance de homologar</div>
+                        </div>
+                    </div>
+                    <div class="card success">
+                        <div class="clabel">Com Dgenny® — Nova Realidade</div>
+                        <div style="margin-top: 12px;">
+                            <div class="chk good mt-8">✓ Busca automática de fornecedores por cidade e categoria</div>
+                            <div class="chk good mt-8">✓ Filtro por avaliação Google e número de reviews</div>
+                            <div class="chk good mt-8">✓ Solicita CNPJ + referências de clientes na própria cotação</div>
+                            <div class="chk good mt-8">✓ Mais fornecedores = mais competição, menos risco</div>
+                            <div class="chk good mt-8">✓ Michael libera tempo para homologar com qualidade</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card roxo mt-20">
+                    <strong>Como usar na prática:</strong><span style="color: rgba(255,255,255,0.6);"> No campo de observações, o comprador instrui a dgenny®: <em style="color: rgba(255,255,255,0.75);">"Junto com a cotação, solicite o CNPJ e um número de referência de cliente para cadastro."</em> A dgenny® inclui automaticamente em todas as abordagens.</span>
+                </div>
+                <div class="g2 mt-16">
+                    <div class="card">
+                        <div class="bnum c-roxo" style="font-size: 36px;">35+</div>
+                        <div class="steptitle mt-8">fornecedores sugeridos</div>
+                        <div class="cdesc mt-8">por cotação — filtráveis por avaliação, localidade e tipo</div>
+                    </div>
+                    <div class="card">
+                        <div class="bnum c-green" style="font-size: 28px;">Pré-qual</div>
+                        <div class="steptitle mt-8">embutida no fluxo</div>
+                        <div class="cdesc mt-8">sem processo extra — verificação acontece junto com a cotação</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: A ALAVANCA ESTRATÉGICA -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">A Alavanca Estratégica</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O trabalho que nunca acontece — mas deveria</h2>
+                <p class="sub sub-md mt-8">O que Michael e a equipe fariam com o tempo devolvido pela dgenny®</p>
+                <div class="g2 mt-20">
+                    <div class="card roxo">
+                        <div style="font-size: 22px; margin-bottom: 10px;">🎯</div>
+                        <div class="ctitle">Negociação estratégica</div>
+                        <div class="cdesc">Com o mapa pronto e equalizado, o comprador entra na jogada só para fechar — negocia mais agressivo, com dados completos na mão</div>
+                    </div>
+                    <div class="card roxo">
+                        <div style="font-size: 22px; margin-bottom: 10px;">🏗️</div>
+                        <div class="ctitle">Levantamento de preço para licitação</div>
+                        <div class="cdesc">Antes de participar de uma licitação, a equipe levanta preços reais de mercado via dgenny® — melhora a margem de precificação da proposta</div>
+                    </div>
+                    <div class="card roxo">
+                        <div style="font-size: 22px; margin-bottom: 10px;">🔍</div>
+                        <div class="ctitle">Homologação com qualidade</div>
+                        <div class="cdesc">Tempo para ligar nas referências, verificar CNPJ, avaliar histórico — proteger a empresa de fornecedores fraudulentos sem fazer às pressas</div>
+                    </div>
+                    <div class="card roxo">
+                        <div style="font-size: 22px; margin-bottom: 10px;">🚛</div>
+                        <div class="ctitle">Gestão da Apex (locadora)</div>
+                        <div class="cdesc">Michael sai do operacional de suprimentos e volta a cuidar da Apex e das frotas — o outro braço de negócio que também precisa de atenção gerencial</div>
+                    </div>
+                </div>
+                <div class="card danger mt-20">
+                    <div class="clabel">O que acontece sem a dgenny®</div>
+                    <p class="cdesc" style="font-size: 14px; color: rgba(255,255,255,0.7);">"Eu tenho Apex para olhar, cuido das frotas, tenho as coisas dos proprietários. Eu preciso sair um pouco do operacional e montar uma equipe para tocar o restante." — Michael, 17/06/2026</p>
+                    <p class="cdesc mt-8">Sem automação, cada nova obra = mais pressão sobre Michael. O gestor estratégico fica preso no operacional indefinidamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: TRANSFORMAÇÃO OPERACIONAL -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Transformação Operacional</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O que muda no dia a dia da Espala</h2>
+                <div class="mt-16" style="overflow-x: auto;">
+                    <table class="dtable">
+                        <thead>
+                            <tr>
+                                <th>Métrica</th>
+                                <th>Hoje</th>
+                                <th></th>
+                                <th>Com dgenny®</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Disparo de cotação para 3+ fornecedores</td>
+                                <td class="amt">Manual, um a um</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">Simultâneo, automático</td>
+                            </tr>
+                            <tr>
+                                <td>Abertura de fornecedores em nova cidade</td>
+                                <td class="amt">Google + WhatsApp manual</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">Busca automática + filtro</td>
+                            </tr>
+                            <tr>
+                                <td>Equalização do mapa de cotação</td>
+                                <td class="amt">Planilha manual</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">PDF + Excel automático</td>
+                            </tr>
+                            <tr>
+                                <td>Follow-up com fornecedor sem resposta</td>
+                                <td class="amt">100% manual</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">0% — dgenny® cuida</td>
+                            </tr>
+                            <tr>
+                                <td>Cotação de mão de obra / prestação de serviço</td>
+                                <td class="amt">Mesmo processo braçal</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">Mesma automação</td>
+                            </tr>
+                            <tr>
+                                <td>Cotações simultâneas de obras diferentes</td>
+                                <td class="amt">Risco de confusão</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">Cada assistente = 1 número</td>
+                            </tr>
+                            <tr>
+                                <td>Michael no operacional de cotação</td>
+                                <td class="amt">Alta dependência</td>
+                                <td style="text-align:center;">→</td>
+                                <td class="amt pos">Foco total no estratégico</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="g3 mt-20">
+                    <div class="card roxo">
+                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Operacional eliminado</div>
+                        <div class="bnum c-roxo" style="font-size: 40px; margin-top: 6px;">-80%</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px;">do tempo em tarefas repetitivas de cotação</div>
+                    </div>
+                    <div class="card roxo">
+                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Negociações no pacote</div>
+                        <div class="bnum c-green" style="font-size: 40px; margin-top: 6px;">1.000</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px;">conversas/mês com fornecedores — 2 assistentes</div>
+                    </div>
+                    <div class="card roxo">
+                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Equipe</div>
+                        <div class="bnum c-rosa" style="font-size: 40px; margin-top: 6px;">Mesma</div>
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 8px;">ninguém substituído — todos com mais poder de entrega</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: PARA O DIRETOR -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Para o Decisor</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O que a IA entrega para a Espala — em números</h2>
+                <p class="sub sub-md mt-8">Para a diretoria: o que muda no financeiro e no crescimento da empresa</p>
+                <div class="g2 mt-24">
+                    <div>
+                        <div class="roi-box">
+                            <div class="roi-num" style="font-size: 52px;">5–12%</div>
+                            <div class="roi-lbl">Saving projetado e realizado</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 8px;">Resultado médio de clientes dgenny® com uso diário — mais fornecedores, mais competição, melhor negociação</div>
+                        </div>
+                        <div class="roi-box mt-12">
+                            <div class="roi-num" style="font-size: 44px;">R$ 4k/mês</div>
+                            <div class="roi-lbl">Investimento — 2 assistentes</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 8px;">Menos do que 1 comprador júnior — sem encargos, sem rescisão, sem 6 meses de curva de aprendizado</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 13px;">
+                        <div class="card success">
+                            <div class="clabel">Crescimento sem contratar</div>
+                            <div class="ctitle">Mais obras, mesma equipe</div>
+                            <div class="cdesc">A dgenny® absorve aumento de volume sem custo linear. A Espala pode aceitar mais obras sem precisar aumentar o time de compras proporcionalmente</div>
+                        </div>
+                        <div class="card success">
+                            <div class="clabel">Licitação mais precisa</div>
+                            <div class="ctitle">Preço real antes do fechamento</div>
+                            <div class="cdesc">Antes de participar de uma licitação, a equipe levanta preços reais de mercado via dgenny® — melhora a margem de precificação da proposta antes do fechamento</div>
+                        </div>
+                        <div class="card success">
+                            <div class="clabel">Dois departamentos, um investimento</div>
+                            <div class="ctitle">Suprimentos + Licitação</div>
+                            <div class="cdesc">A dgenny® serve tanto para cotação de material quanto para levantamento de preços no setor de licitação — mesma solução, dois times beneficiados</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: CUSTO DE OPORTUNIDADE -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Custo de Oportunidade</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg">O que fica na mesa todo mês sem agir</h2>
+                <div class="mt-16" style="overflow-x: auto;">
+                    <table class="dtable">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Impacto Mensal</th>
+                                <th></th>
+                                <th>Impacto Anual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="sub-head red">
+                                <td colspan="4">CUSTO DE TEMPO OPERACIONAL</td>
+                            </tr>
+                            <tr>
+                                <td>Horas da Bruna + Maris em cotação manual (est. 70–80% do dia)</td>
+                                <td class="amt">120–160h perdidas</td>
+                                <td></td>
+                                <td class="amt">1.440–1.920h</td>
+                            </tr>
+                            <tr>
+                                <td>Tempo de Michael no operacional em vez do estratégico</td>
+                                <td class="amt">Horas/semana</td>
+                                <td></td>
+                                <td class="amt">Semanas de trabalho</td>
+                            </tr>
+                            <tr>
+                                <td>Follow-up manual com fornecedores sem resposta</td>
+                                <td class="amt">Horas/semana</td>
+                                <td></td>
+                                <td class="amt">Dias de trabalho</td>
+                            </tr>
+                            <tr class="sub-head red">
+                                <td colspan="4">CUSTO NAS CONDIÇÕES DE COMPRA</td>
+                            </tr>
+                            <tr>
+                                <td>Saving perdido por negociação interrompida por urgência</td>
+                                <td class="amt neu">5–10% por cotação</td>
+                                <td></td>
+                                <td class="amt neu">Recorrente — não contabilizado</td>
+                            </tr>
+                            <tr>
+                                <td>Compras com poucos fornecedores por falta de tempo de abrir mais</td>
+                                <td class="amt">Preços sem competição</td>
+                                <td></td>
+                                <td class="amt">Perdas acumuladas</td>
+                            </tr>
+                            <tr class="sub-head red">
+                                <td colspan="4">CUSTO DE CRESCIMENTO</td>
+                            </tr>
+                            <tr>
+                                <td>Cada nova obra = mais pressão sobre a mesma equipe manual</td>
+                                <td class="amt">Risco de erro</td>
+                                <td></td>
+                                <td class="amt">Obras com atraso</td>
+                            </tr>
+                            <tr>
+                                <td>Contratar comprador para absorver volume (vs. dgenny®)</td>
+                                <td class="amt">R$ 3,5k–5k + encargos</td>
+                                <td></td>
+                                <td class="amt">R$ 50k–80k</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>Investimento dgenny® (2 assistentes)</strong></td>
+                                <td><strong>R$ 4.000/mês</strong></td>
+                                <td></td>
+                                <td><strong>R$ 48.000/ano</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 12px; position: relative; z-index: 1;">
+                    * Estimativas baseadas em 10–15 cotações/dia e equipe de 2 compradores. Saving de 5–12% é baseado em resultado médio de clientes dgenny® com uso constante — volume financeiro exato de compras da Espala não informado na reunião.
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: PRÓXIMOS PASSOS -->
+        <div class="slide">
+            <div class="slide-top">
+                <div class="logo">
+                    <div class="logo-ico">✦</div>
+                    <span>dgenny<span class="logo-reg">®</span></span>
+                </div>
+                <span class="eyebrow">Próximos Passos</span>
+            </div>
+            <div class="content">
+                <h2 class="hl hl-lg mt-8">O caminho até a decisão</h2>
+                <p class="sub sub-md mt-8">O que foi combinado — quem faz o quê</p>
+                <div class="g2 mt-20" style="gap: 14px;">
+                    <div class="nsc highlight">
+                        <div class="nnum">Michael — até semana que vem</div>
+                        <div class="nt">Mapear o fluxo e levar ao diretor</div>
+                        <div class="nd">Desenhar como a dgenny® se encaixa no processo da Espala, mapear prós e contras, e apresentar ao diretor quando ele retornar da viagem — já com o investimento estimado: R$4k/mês para 2 assistentes ou R$5k para 3</div>
+                        <div class="na">→ Diretor já sabe o valor antes da reunião com a dgenny®</div>
+                    </div>
+                    <div class="nsc highlight">
+                        <div class="nnum">dgenny® — já enviado</div>
+                        <div class="nt">Este Mapa Comparativo</div>
+                        <div class="nd">Diagnóstico completo do cenário atual, argumentos de implicação, projeção de ganho e os próximos passos para o diretor avaliar — encaminhar a ele antes da conversa</div>
+                        <div class="na">→ Usar o slide 9 na conversa com o diretor</div>
+                    </div>
+                    <div class="nsc">
+                        <div class="nnum">Próximo passo conjunto — semana que vem</div>
+                        <div class="nt">Reunião com o Diretor + Demo ao vivo</div>
+                        <div class="nd">Se o diretor topar, Tierre faz demonstração ao vivo — dgenny® rodando com o fluxo real da Espala, cotação disparada na hora, mapa gerado em minutos. Michael agenda assim que o diretor liberar.</div>
+                        <div class="na">→ Tierre disponível para agendar com curto prazo</div>
+                    </div>
+                    <div class="nsc">
+                        <div class="nnum">Se avançar</div>
+                        <div class="nt">Proposta + Reunião técnica com UAL</div>
+                        <div class="nd">Proposta formal personalizada para a Espala. Reunião com TI + equipe UAL para avaliar integração — dgenny® conduz e assume a análise técnica. A solução funciona sem integração enquanto a análise acontece.</div>
+                        <div class="na">→ Integração depende do UAL, não impede o início</div>
+                    </div>
+                </div>
+                <div style="position: relative; z-index: 1; margin-top: auto; padding-top: 16px;">
+                    <p class="hl hl-lg" style="letter-spacing: 2px; color: rgba(255,255,255,0.12);">Compre melhor. Escale mais. Liberte sua equipe.</p>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /deck -->
+
+    <div class="nav-bar">
+        <button class="nav-btn" onclick="prevSlide()">← Anterior</button>
+        <span class="slide-counter" id="counter">1 / 11</span>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let cur = 0;
+        const total = slides.length;
+
+        function update() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+            document.getElementById('counter').textContent = (cur + 1) + ' / ' + total;
+            document.getElementById('progressBar').style.width = ((cur + 1) / total * 100) + '%';
+        }
+
+        function nextSlide() {
+            if (cur < total - 1) { cur++; update(); }
+        }
+
+        function prevSlide() {
+            if (cur > 0) { cur--; update(); }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+        });
+
+        let _tx = 0, _ty = 0;
+        document.addEventListener('touchstart', function(e) {
+            _tx = e.touches[0].clientX;
+            _ty = e.touches[0].clientY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', function(e) {
+            const dx = e.changedTouches[0].clientX - _tx;
+            const dy = e.changedTouches[0].clientY - _ty;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 48) {
+                if (dx < 0) nextSlide();
+                else prevSlide();
+            }
+        }, { passive: true });
+
+        update();
+    </script>
+</body>
+</html>
